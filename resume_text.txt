@@ -1,0 +1,67 @@
+ 
+ 
+ 
+EDUCATION  Muppidi Rahul Reddy  
+Sunnyvale, CA, 94085  | 940-745-9717  | rahulreddy 3620 @gmail.com  | linkedin.com/muppidi -
+rahul -reddy  | github.com/ RahulReddy20  | rahul -reddy.vercel.app  
+ 
+University  of Texas  at Dallas  Aug ‘2022 – Dec ‘ 2023 
+Master  of Science  in Computer Science  GPA  3.61 
+Courses:  Statistical Methods for Data Science, Machine Learning, Computer Vision, Big Data  Analytics, Design and Analysis of 
+Algorithms, Web Programming Languages, Database Design.  
+Indian  Institute  of Information  Technology Allahabad  Jul ‘2018 - May ‘2022 
+Bachelor  of Technology  in Information  Technology   
+Courses: Data  Structures  and Algorithms,  Operating  Systems,  Automata  Theory,  Database  Management,  Machine Learning, Computer  
+Networks,  Data  Mining, Graph Theory, Object Oriented Programming, Wireless Network Security  
+TECHNICAL  KNOWLEDGE  
+Programming Languages  
+Databases  
+Systems Programming  
+Cloud & Big Data  
+ 
+Web Development  
+Machine Learning  
+Genera tive AI  C/C++,  Python,  Java, JavaScript,  R, Shell  Scripting ,  
+MySQL,  PostgreSQL, MongoDB,  Oracle  DB 
+Inodes, File Handling, Page Tables, Process Scheduling, Virtual Memory, Interrupt Handling  
+AWS (S3, EC2, RDS , Lamda, Textract, OpenSearch Service, SageMaker, Bedrock ), Apache Spark, 
+Hadoop, Kafka  
+HTML,  CSS, React, NextJS, PHP, Typescript , Flask  
+Panda s, Numpy, Yolov5, Tensorflow, Keras , Pytorch, SciPy,  Scikit -learn  
+LangChain, LMStudio, Ollama, Prompt Engineering , RAG  
+Other  Tools & Technologies  Docker, Git, Power BI, MATLAB, Excel  
+PROFESSIONAL  EXPERIENCE  
+ 
+Applab Systems,  Dallas,TX   Jan ‘2024 – Present  
+Software Development Engineer  – RAG , NLP , LangChain  
+• Improved information retrieval accuracy by 70% compared to keyword search by implementing semantic search capabilities using 
+Amazon OpenSearch Service  with the k -NN index.  
+• Built a highly accurate (95%+) document OCR pipeline utilizing Amazon Textract  for extracting text and structural data from 
+complex engineering diagrams and schematics stored in S3.  
+• Optimized retrieval precision by 40% through advanced text chunking algorithms executed in AWS Lambda  and generating vector 
+embeddings via OpenAI Embeddings API .  
+• Integrated  GPT -4 with Vision  via API calls from AWS compute  services to analyze and interpret engineering drawings, enhancing 
+multimodal RAG capabilities and boosting usability by 60%.  
+• Leveraged the GPT -4 API  from AWS services for generating accurate, context -aware answers based on technical document chunks 
+retrieved from Amazon OpenSearch Service.  
+Coral Innovations Pvt. Ltd , Hyderabad,India   Dec ‘2021 – Jul ‘2022 
+Machine Leaning Engineer  – Pytorch, YOLOv5 , Python  
+• Engineered a Meter Board Reader application  using YOLOv5, automating meter reading with 78% accuracy . 
+• Improved dataset preprocessing, enhancing pipeline efficiency by 30%  through optimized feature extraction.  
+• Implemented data augmentation techniques , increasing model robustness and generalization.  
+• Fine-tuned object detection models, achieving higher accuracy with optimized hyperparameters . 
+ACADEMIC  PROJECTS  
+Mini Unix Kernel Simulation – C, Inodes , File-handling, Page tables     
+• Built a simplified Unix -like kernel  supporting process creation, scheduling, and system calls (e.g., fork(), exec(), wait()).  
+• Implemented a basic file system  layer with support for block -level access, inodes, and file metadata management.  
+• Designed an interrupt handling mechanism and incorporated basic virtual memory management with page tables and swapping.  
+Scalable Search Engine Using Elasticsearch – Elasticsearch, Python, Kibana   
+• Indexed large datasets (e.g., Wikipedia dump) and exposed a REST API for fast, ranked queries.  
+• Tuned shard allocation, replication, and indexing strategies to improve query throughput and fault tolerance . 
+• Integrated Kibana dashboards to visualize usage stats and search heatmaps.  
+Predicting Safety Probabilities by Location and Day  in Dallas – Pandas, Streamlit, sklearn , Llama -2 
+• Created a Streamlit dashboard  to analyze crime severity using Random Forest classification . 
+• Integrated Llama -2 NLP model  for text -based severity analysis.  
+PERSONAL  ACCOMPLISHMENTS  
+• Demonstrated problem -solving and technical skills  through active participation in hackathons and data science competitions.  
+• Managed social media engagement and event coordination for a university dance crew, increasing audience interaction.  

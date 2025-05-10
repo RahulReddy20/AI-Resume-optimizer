@@ -1,3 +1,11 @@
+./optimized_resume.out
+./optimized_resume.pdf
+./optimized_resume.tex
+./optimized_resume.docx
+./optimized_resume.doc
+./optimized_resume.txt
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
