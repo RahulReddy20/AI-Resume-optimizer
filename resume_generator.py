@@ -15,7 +15,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
-def generate_optimized_resume(resume_text, job_description, missing_skills, similarity_score):
+def generate_optimized_resume(resume_json, job_description, missing_skills, similarity_score):
     """
     Generate an optimized resume based on the job description using Gemini API
 
@@ -32,8 +32,8 @@ def generate_optimized_resume(resume_text, job_description, missing_skills, simi
     prompt = f"""
     You are a professional resume writer tasked with optimizing a resume to better match a job description.
     
-    ORIGINAL RESUME:
-    {resume_text}
+    ORIGINAL RESUME in JSON format:
+    {resume_json}
     
     JOB DESCRIPTION:
     {job_description}
@@ -47,11 +47,11 @@ def generate_optimized_resume(resume_text, job_description, missing_skills, simi
     the candidate's fit for this specific position.
     
     YOUR OUTPUT MUST INCLUDE: 
-    - A "summary" or "objective" field
     - Complete contact information
     - Education details
     - Skills formatted properly
     - Experience entries with descriptions
+    - Project entries with descriptions if the Original Resume has projects
     
     Format the output as a JSON object with the following structure:
     {{

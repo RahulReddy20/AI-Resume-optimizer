@@ -5,7 +5,7 @@ import sys
 import json
 import subprocess
 import platform
-from pdf_parser import extract_text_from_pdf, read_job_description
+from pdf_parser import extract_json_from_pdf, read_job_description, extract_text_from_pdf
 from utils import calculate_similarity, identify_missing_skills
 from resume_generator import generate_optimized_resume, create_resume_docx, create_resume_latex
 
@@ -120,10 +120,11 @@ def main():
     try:
         # Step 1: Extract text from resume PDF
         print("Extracting text from resume...")
+        resume_json = extract_json_from_pdf(args.resume)
         resume_text = extract_text_from_pdf(args.resume)
         with open("resume_text.txt", "w", encoding="utf-8") as f:
             f.write(resume_text)
-        if not resume_text:
+        if not resume_json:
             print("Error: Could not extract text from resume PDF. Please check the file.")
             return 1
 
@@ -151,7 +152,7 @@ def main():
         # Step 5: Generate optimized resume
         print("Generating optimized resume...")
         optimized_resume_json = generate_optimized_resume(
-            resume_text,
+            resume_json,
             job_description,
             missing_skills,
             similarity_score
