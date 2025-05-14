@@ -190,6 +190,14 @@ def main():
                 if pdf_success:
                     print(
                         f"✅ Optimized resume saved successfully to: {args.output}.pdf")
+                    optimized_resume_text = extract_text_from_pdf(
+                        f"{args.output}.pdf")
+                    print(
+                        "Analyzing similarity between optimized resume and job description...")
+                    optimized_similarity_score = calculate_similarity(
+                        optimized_resume_text, job_description)
+                    print(
+                        f"Current match score: {optimized_similarity_score:.2f} out of 1.00")
                     return 0
                 else:
                     print("Failed to generate PDF directly. Manual steps:")

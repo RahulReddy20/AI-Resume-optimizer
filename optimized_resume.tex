@@ -1,51 +1,81 @@
-\documentclass{resume}
-\usepackage[left=0.4 in,top=0.4in,right=0.4 in,bottom=0.4in]{geometry}
-\newcommand{\tab}[1]{\hspace{.2667\textwidth}\rlap{#1}}
+\documentclass{resume} % Use the custom resume.cls style
+
+\usepackage[left=0.4in,top=0.4in,right=0.4 in,bottom=0.4in]{geometry} % Document margins
+
+\usepackage{tabularx}
+\newcommand{\tab}[1]{\hspace{.2667\textwidth}\rlap{#1}} 
 \newcommand{\itab}[1]{\hspace{0em}\rlap{#1}}
-\name{Muppidi Rahul Reddy}
-\address{940-745-9717 \\ Sunnyvale, CA, 94085}
-\address{\href{mailto:rahulreddy3620@gmail.com}{rahulreddy3620@gmail.com} \\ \href{linkedin.com/muppidi-rahul-reddy}{linkedin.com/muppidi-rahul-reddy}}
+\name{Resume Owner} % Your name
+% You can merge both of these into a single line, if you do not have a website.
+\address{555-555-5555 \\ Anytown, USA \\
+\href{mailto:resume.owner@example.com}{resume.owner@example.com}}
+
+% \href{www.faangpath.com}{www.faangpath.com} %
+
 \begin{document}
-\begin{rSection}{OBJECTIVE}
+%----------------------------------------------------------------------------------------
+%	EDUCATION SECTION
+%----------------------------------------------------------------------------------------
 
-{AI Engineer with experience in developing and deploying machine learning and generative AI solutions. Proficient in Python, PyTorch/TensorFlow, and cloud platforms (AWS). Proven ability to fine-tune LLMs, build scalable APIs, and manage MLOps pipelines. Seeking to leverage expertise in AI to contribute to the development of innovative solutions in the insurance or fintech industry.}
-
-\end{rSection}
 \begin{rSection}{Education}
 
-{\bf Master of Science in Computer Science}, University of Texas at Dallas \hfill {Aug '2022 - Dec '2023}
-
-{\bf Bachelor of Technology in Information Technology}, Indian Institute of Information Technology Allahabad \hfill {Jul 2018 - May '2022}
+\textbf{Example University}, \hfill {2014 - 2018}\\
+Bachelor of Science in Computer Science
 
 \end{rSection}
+
+%----------------------------------------------------------------------------------------
+% TECHINICAL STRENGTHS	
+%----------------------------------------------------------------------------------------
 \begin{rSection}{SKILLS}
 
-\begin{tabular}{ @{} >{\bfseries}l @{\hspace{6ex}} l }
-Technical Skills & Python, PyTorch, TensorFlow, AWS (S3, EC2, RDS, Lambda, Textract, OpenSearch Service, SageMaker, Bedrock), LangChain, Prompt Engineering, API Development, Microservices, MLOps, Docker, Git, NLP, RAG, C/C++, Java, JavaScript, R, Shell Scripting, MySQL, PostgreSQL, MongoDB, Oracle DB, HTML, CSS, React, NextJS, PHP, Typescript, Flask, Pandas, Numpy, Yolov5, Keras, SciPy, Scikit-learn, LMStudio, Ollama \\
-\end{tabular}\\
+\noindent % Ensure table aligns with text block margin
+\begin{tabularx}{\textwidth}{ @{} >{\bfseries}l @{\hspace{3ex}} X } % Table spans \textwidth, X column wraps
+Technical Skills & React, JavaScript, CSS3, HTML5, Python, Cypress, REST, gRPC, AWS, GCP, Azure, CI/CD, Agile Development, Cloud Development \\
+\end{tabularx}
 \end{rSection}
+
 \begin{rSection}{EXPERIENCE}
 
-\textbf{Software Development Engineer} \hfill Jan '2024 - Present\\
-Applab Systems \hfill \textit{Dallas, TX}
+\textbf{Software Engineer} \textbf{- Example Company} \hfill 2018 - Present\\
 \begin{itemize}
-    \itemsep -3pt {} 
-     \item Improved information retrieval accuracy by 70\textbackslash{}% compared to keyword search by implementing semantic search capabilities using Amazon OpenSearch Service with the k-NN index, enhancing AI-driven solutions.
-     \item Built a highly accurate (95\textbackslash{}%+) document OCR pipeline utilizing Amazon Textract for extracting text and structural data from complex engineering diagrams and schematics stored in S3, streamlining data processing for AI models.
-     \item Optimized retrieval precision by 40\textbackslash{}% through advanced text chunking algorithms executed in AWS Lambda and generating vector embeddings via OpenAI Embeddings API, improving the efficiency of LLMs.
-     \item Integrated GPT-4 with Vision via API calls from AWS compute services to analyze and interpret engineering drawings, enhancing multimodal RAG capabilities and boosting usability by 60\textbackslash{}%, demonstrating expertise in deploying AI models.
-     \item Leveraged the GPT-4 API from AWS services for generating accurate, context-aware answers based on technical document chunks retrieved from Amazon OpenSearch Service, showcasing experience in building AI-powered applications.
-\end{itemize}
+    \itemsep -6pt {} 
+     \item Developed and maintained interactive user interfaces using React, JavaScript, CSS3, and HTML5.
+     \item Collaborated with UX designers and product managers to gather and implement customer requirements.
+     \item Participated in code reviews and design discussions to ensure code quality and maintainability.
+     \item Implemented comprehensive test suites using Cypress to ensure stability and prevent regressions.
+     \item Worked within an agile development environment, utilizing CI/CD pipelines for continuous integration and deployment.
+ \end{itemize}
 
-\textbf{Machine Leaning Engineer} \hfill Dec '2021 - Jul '2022\\
-Coral Innovations Pvt. Ltd \hfill \textit{Hyderabad, India}
+
+\end{rSection} 
+
+%----------------------------------------------------------------------------------------
+%	WORK EXPERIENCE SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{rSection}{PROJECTS}
+\vspace{-1.25em}
+\item \textbf{Personal Projects}
 \begin{itemize}
-    \itemsep -3pt {} 
-     \item Engineered a Meter Board Reader application using YOLOv5, automating meter reading with 78\textbackslash{}% accuracy, demonstrating experience in developing and deploying ML solutions.
-     \item Improved dataset preprocessing, enhancing pipeline efficiency by 30\textbackslash{}% through optimized feature extraction, contributing to model performance.
-     \item Implemented data augmentation techniques, increasing model robustness and generalization.
-     \item Fine-tuned object detection models, achieving higher accuracy with optimized hyperparameters.
-\end{itemize}
+    \itemsep -6pt {} 
+     \item No specific projects listed in the JSON data. Add your personal projects here.
+ \end{itemize}
+ 
+\end{rSection} 
+
+%----------------------------------------------------------------------------------------
+\begin{rSection}{Personal Accomplishments} 
+\vspace{0em}
+\begin{itemize}
+    \itemsep -6pt {} 
+     \item No specific personal accomplishments listed in the JSON data. Add your personal accomplishments here.
+ \end{itemize}
+
 
 \end{rSection}
+
+%----------------------------------------------------------------------------------------
+
+
 \end{document}

@@ -33,7 +33,7 @@ def generate_optimized_resume(resume_json, job_description, missing_skills, simi
     You are a professional resume writer tasked with optimizing a resume to better match a job description.
     
     ORIGINAL RESUME in JSON format:
-    {resume_json}
+    {json.dumps(resume_json, indent=2)}
     
     JOB DESCRIPTION:
     {job_description}
@@ -53,61 +53,12 @@ def generate_optimized_resume(resume_json, job_description, missing_skills, simi
     - Experience entries with descriptions
     - Project entries with descriptions if the Original Resume has projects
     
-    Format the output as a JSON object with the following structure:
-    {{
-        "contact_info": {{
-            "name": "...",
-            "email": "...",
-            "phone": "...",
-            "location": "...",
-            "linkedin": "..." (if available)
-        }},
-        "summary": "A concise professional summary or objective statement",
-        "skills": {{
-            "technical_skills": ["skill1", "skill2", ...],
-            "soft_skills": ["skill1", "skill2", ...] (if available),
-            "other_skills": ["skill1", "skill2", ...] (if available)
-        }},
-        "experience": [
-            {{
-                "title": "...",
-                "company": "...",
-                "location": "...",
-                "dates": "...",
-                "description": ["bullet point 1", "bullet point 2", ...]
-            }},
-            ...
-        ],
-        "education": [
-            {{
-                "degree": "...",
-                "institution": "...",
-                "dates": "...",
-                "details": "..." (optional)
-            }},
-            ...
-        ],
-        "projects": [
-            {{
-                "title": "...",
-                "description": "..."
-            }},
-            ...
-        ] (if available),
-        "certifications": [
-            {{
-                "name": "...",
-                "issuer": "...",
-                "date": "..."
-            }},
-            ...
-        ] (if available),
-        "activities": ["activity1", "activity2", ...] (if available),
-        "leadership": ["leadership1", "leadership2", ...] (if available)
-    }}
+    Format the output as a JSON object in the same structure as the Original Resume.
+    IMPORTANT: Ensure all property names and string values are enclosed in DOUBLE QUOTES, not single quotes.
+    Follow the RFC 8259 JSON specification exactly.
+    All strings MUST use proper escaping for special characters.
     
     Only include sections that are present in the original resume. Keep the content TRUTHFUL and based on the original resume.
-    Output ONLY the JSON with no other text before or after. Double-check that your JSON includes all required fields, especially the "summary" field.
     """
 
     try:
@@ -132,57 +83,169 @@ def generate_optimized_resume(resume_json, job_description, missing_skills, simi
             if not isinstance(resume_json, dict):
                 raise ValueError("Response is not a valid JSON object")
 
-            # Check and fix missing required sections
-            if "contact_info" not in resume_json:
-                resume_json["contact_info"] = {
-                    "name": "", "email": "", "phone": "", "location": ""}
-
-            if "summary" not in resume_json:
-                resume_json["summary"] = "Professional seeking opportunities in the field."
-
-            # Convert any dict_keys objects (which are not JSON serializable) to lists
-            if "skills" in resume_json and isinstance(resume_json["skills"], dict):
-                for key in list(resume_json["skills"].keys()):
-                    skills_value = resume_json["skills"][key]
-                    if not isinstance(skills_value, list):
-                        if hasattr(skills_value, 'keys'):  # Handle dict_keys objects
-                            resume_json["skills"][key] = list(skills_value)
-                        else:
-                            # Convert other non-list types to a list with a single element
-                            resume_json["skills"][key] = [str(skills_value)]
-
-            print("Resume JSON successfully generated and validated")
+            print("Successfully parsed response JSON")
+            return resume_json
 
         except json.JSONDecodeError as e:
-            print(f"JSON parse error: {str(e)}")
+            print(f"JSON parse error in resume generation: {str(e)}")
+
             # If direct parsing fails, try to extract JSON from text
             text = response.text
+
             # Find JSON content between curly braces
             start_idx = text.find('{')
             end_idx = text.rfind('}') + 1
+
             if start_idx >= 0 and end_idx > start_idx:
                 json_str = text[start_idx:end_idx]
                 try:
-                    resume_json = json.loads(json_str)
-                    print("Successfully extracted JSON from response text")
+                    # Try to clean the JSON before parsing
+                    cleaned_json = json_str
+
+                    # Replace single quotes with double quotes (improved regex)
+                    cleaned_json = re.sub(
+                        r"(?<={|,)\s*'([^']+?)'(?=\s*:)", r'"\1"', cleaned_json)
+                    cleaned_json = re.sub(
+                        r":\s*'((?:[^'\\]|\\.)*)'/g", r':"\1"', cleaned_json)
+
+                    # Fix escaped backslashes
+                    cleaned_json = cleaned_json.replace("\\\\", "\\\\\\\\")
+
+                    # Remove any code block markers
+                    cleaned_json = re.sub(r'```json|```', '', cleaned_json)
+
+                    # Fix unescaped newlines in string values
+                    cleaned_json = re.sub(
+                        r'"\s*\n\s*([^"])', r'" \1', cleaned_json)
+
+                    # Handle multiline strings
+                    cleaned_json = re.sub(r'"\s*\n\s*"', r'', cleaned_json)
+
+                    resume_json = json.loads(cleaned_json)
+                    print("Successfully extracted and cleaned JSON from response text")
+                    return resume_json
+
                 except json.JSONDecodeError as e2:
                     print(f"Secondary JSON parse error: {str(e2)}")
-                    # Last resort: Try to clean up JSON with regex
-                    import re
-                    # Remove non-JSON content that might be causing issues
-                    json_str = re.sub(r'```json|```', '', json_str)
-                    # Try again with cleaned text
+
+                    # Try a recursive approach with Gemini
+                    for attempt in range(1, 4):  # Try up to 3 times
+                        try:
+                            fix_prompt = f"""
+                            This JSON has syntax errors and cannot be parsed. Please fix it to be valid JSON with double quotes 
+                            for all property names and string values. Fix all escaping and format issues:
+                            
+                            {cleaned_json if attempt == 1 else json_str}
+                            
+                            Return ONLY the fixed JSON with no additional text.
+                            Make sure all strings are properly escaped with special attention to:
+                            1. Ensure all backslashes are properly doubled when needed in strings
+                            2. Fix any unescaped quotes inside string values
+                            3. Fix unescaped newlines in string values
+                            4. Ensure no trailing commas in arrays or objects
+                            5. All keys and string values must use double quotes
+                            """
+
+                            fix_response = client.models.generate_content(
+                                model="gemini-2.0-flash",
+                                contents=fix_prompt,
+                                config=types.GenerateContentConfig(
+                                    temperature=0,
+                                    response_mime_type="application/json"
+                                )
+                            )
+
+                            # Try to parse the fixed JSON
+                            fixed_text = fix_response.text.strip()
+
+                            # Extract content between code blocks if present
+                            if fixed_text.startswith("```") and "```" in fixed_text:
+                                fixed_text = re.search(
+                                    r'```(?:json)?\s*([\s\S]+?)\s*```', fixed_text).group(1)
+
+                            # Try to find JSON structure
+                            json_start = fixed_text.find('{')
+                            json_end = fixed_text.rfind('}') + 1
+                            if json_start >= 0 and json_end > json_start:
+                                fixed_json = fixed_text[json_start:json_end]
+
+                                try:
+                                    resume_json = json.loads(fixed_json)
+                                    print(
+                                        f"Successfully fixed JSON with Gemini (attempt {attempt})")
+                                    return resume_json
+                                except json.JSONDecodeError:
+                                    # Use this as input for next attempt
+                                    json_str = fixed_json
+                                    print(
+                                        f"JSON fix attempt {attempt} failed, trying again")
+                            else:
+                                print(
+                                    f"No JSON structure found in fix attempt {attempt}")
+
+                        except Exception as e3:
+                            print(f"Error in fix attempt {attempt}: {str(e3)}")
+                            continue
+
+                    # Last resort: Extract key-value pairs using regex
+                    print("All Gemini repair attempts failed, trying regex extraction")
                     try:
-                        resume_json = json.loads(json_str)
-                        print("Successfully parsed JSON after cleanup")
-                    except:
-                        raise ValueError(
-                            f"Failed to parse JSON after multiple attempts: {str(e2)}")
+                        pattern = r'"([^"]+)":\s*"([^"\\]*(?:\\.[^"\\]*)*)"'
+                        matches = re.findall(pattern, json_str)
+                        if matches:
+                            # Create a minimal valid JSON structure with extracted key-values
+                            extracted_json = {}
+                            for key, value in matches:
+                                value_cleaned = value.replace('\\"', '"')
+                                parts = key.split('.')
+                                if len(parts) == 1:
+                                    extracted_json[key] = value_cleaned
+                                else:
+                                    # Handle nested keys like "contact_info.name"
+                                    current = extracted_json
+                                    for part in parts[:-1]:
+                                        if part not in current:
+                                            current[part] = {}
+                                        current = current[part]
+                                    current[parts[-1]] = value_cleaned
+
+                            # Ensure minimal required structure
+                            if extracted_json:
+                                print("Created partial JSON from regex extraction")
+
+                                # Add minimal required fields if missing
+                                if "contact_info" not in extracted_json:
+                                    extracted_json["contact_info"] = {
+                                        "name": "Resume Owner"}
+                                if "experience" not in extracted_json:
+                                    extracted_json["experience"] = []
+                                if "education" not in extracted_json:
+                                    extracted_json["education"] = []
+
+                                return extracted_json
+                    except Exception as e4:
+                        print(f"Regex extraction failed: {str(e4)}")
             else:
                 raise ValueError(
                     "Could not extract valid JSON from response - no JSON structure found")
 
-        return resume_json
+        # Create fallback minimal JSON with original resume data
+        print("All JSON parsing attempts failed, creating fallback resume")
+        fallback_resume = {
+            "contact_info": {
+                "name": resume_json.get("contact_info", {}).get("name", "Resume Owner"),
+                "email": resume_json.get("contact_info", {}).get("email", ""),
+                "phone": resume_json.get("contact_info", {}).get("phone", ""),
+                "location": resume_json.get("contact_info", {}).get("location", "")
+            },
+            "summary": resume_json.get("summary", "Professional with relevant experience and skills."),
+            "skills": resume_json.get("skills", {"technical_skills": []}),
+            "experience": resume_json.get("experience", []),
+            "education": resume_json.get("education", [])
+        }
+
+        print("Created minimal fallback resume structure from original data")
+        return fallback_resume
 
     except Exception as e:
         print(f"Error generating optimized resume: {str(e)}")
@@ -192,15 +255,15 @@ def generate_optimized_resume(resume_json, job_description, missing_skills, simi
             # Extract basic info for a minimal resume
             fallback_resume = {
                 "contact_info": {
-                    "name": "Resume Owner",
-                    "email": "",
-                    "phone": "",
-                    "location": ""
+                    "name": resume_json.get("contact_info", {}).get("name", "Resume Owner"),
+                    "email": resume_json.get("contact_info", {}).get("email", ""),
+                    "phone": resume_json.get("contact_info", {}).get("phone", ""),
+                    "location": resume_json.get("contact_info", {}).get("location", "")
                 },
-                "summary": "Professional with relevant experience and skills.",
-                "skills": {"technical_skills": []},
-                "experience": [],
-                "education": []
+                "summary": resume_json.get("summary", "Professional with relevant experience and skills."),
+                "skills": resume_json.get("skills", {"technical_skills": []}),
+                "experience": resume_json.get("experience", []),
+                "education": resume_json.get("education", [])
             }
 
             print("Created minimal fallback resume structure")
@@ -357,6 +420,7 @@ def create_resume_docx(resume_json, output_path="optimized_resume.docx"):
 def create_resume_latex(resume_json, output_path="optimized_resume.tex"):
     """
     Create a LaTeX document from resume JSON using the template in latex_resume_format folder
+    Uses Gemini API to directly generate LaTeX content.
 
     Parameters:
         resume_json (dict): Resume data in JSON format
@@ -381,147 +445,257 @@ def create_resume_latex(resume_json, output_path="optimized_resume.tex"):
         with open(template_file, 'r', encoding='utf-8') as f:
             template_content = f.read()
 
-        # Extract contact information
-        name = resume_json["contact_info"].get("name", "")
-        phone = resume_json["contact_info"].get("phone", "")
-        location = resume_json["contact_info"].get("location", "")
-        email = resume_json["contact_info"].get("email", "")
-        linkedin = resume_json["contact_info"].get("linkedin", "")
+        # Use Gemini to generate complete LaTeX document
+        latex_content = analyze_and_map_template(template_content, resume_json)
 
-        # Additional optional contact fields that may be present
-        github = resume_json["contact_info"].get("github", "")
-        website = resume_json["contact_info"].get("website", "")
+        if latex_content:
+            # Write the LaTeX content to the output file
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(latex_content)
 
-        # Make sure all values are strings
-        name = str(name) if name else "Your Name"
-        phone = str(phone) if phone else ""
-        location = str(location) if location else ""
-        email = str(email) if email else ""
-        linkedin = str(linkedin) if linkedin else ""
-        github = str(github) if github else ""
-        website = str(website) if website else ""
+            # Copy resume.cls to the output directory if it doesn't exist
+            output_dir = os.path.dirname(output_path)
+            if output_dir == "":
+                output_dir = "."
 
-        # Escape LaTeX special characters in all fields
-        name = escape_latex(name)
-        phone = escape_latex(phone)
-        location = escape_latex(location)
-        email = escape_latex(email)
-        linkedin = escape_latex(linkedin)
-        github = escape_latex(github)
-        website = escape_latex(website)
+            cls_source = os.path.join(template_dir, "resume.cls")
+            cls_target = os.path.join(output_dir, "resume.cls")
 
-        # Replace name in template
-        name_pattern = r'\\name\{[^}]*\}'
-        template_content = re.sub(
-            name_pattern, f'\\name{{{name}}}', template_content)
+            try:
+                if os.path.exists(cls_source) and not os.path.exists(cls_target):
+                    with open(cls_source, 'r', encoding='utf-8') as src:
+                        with open(cls_target, 'w', encoding='utf-8') as dst:
+                            dst.write(src.read())
+                    print(f"Copied resume.cls file to {cls_target}")
+                else:
+                    print(f"Note: resume.cls already exists at {cls_target}")
+            except Exception as e:
+                print(f"Warning: Could not copy resume.cls file: {str(e)}")
+                print(
+                    f"You may need to manually copy resume.cls from {template_dir} to {output_dir}")
 
-        # Build address block content
-        address_blocks = []
-
-        # First address block: Phone and Location
-        address_line1 = []
-        if phone:
-            address_line1.append(phone)
-        if location:
-            address_line1.append(location)
-        if address_line1:
-            address_block1 = " \\\\ ".join(address_line1)
+            print(
+                f"✅ LaTeX resume file created at {output_path}")
+            print("To generate PDF, run: pdflatex optimized_resume.tex")
+            return True
         else:
-            address_block1 = "Phone \\\\ Location"
+            # Fallback to default LaTeX generation if Gemini API fails
+            print(
+                "Warning: Could not generate LaTeX with AI. Falling back to default generation.")
+            return _create_default_latex_resume(resume_json, output_path)
 
-        # Second address block: email, LinkedIn, GitHub, website
-        address_line2 = []
+    except Exception as e:
+        print(f"Error creating LaTeX resume from template: {str(e)}")
+        print(f"Debug info - JSON keys: {list(resume_json.keys())}")
+        print("Falling back to default LaTeX generation...")
+        return _create_default_latex_resume(resume_json, output_path)
+
+
+def analyze_and_map_template(template_content, resume_json):
+    """
+    Use Gemini API to analyze LaTeX template and directly generate LaTeX content for the resume
+
+    Parameters:
+        template_content (str): LaTeX template content
+        resume_json (dict): Resume data in JSON format
+
+    Returns:
+        str: Complete LaTeX document content or None if failed
+    """
+    try:
+        # Extract sections from template for Gemini to analyze
+        sections = re.findall(
+            r'\\begin\{rSection\}\{([^}]*)\}', template_content)
+        section_info = {}
+
+        # Also check for commented-out sections like OBJECTIVE
+        commented_sections = re.findall(
+            r'%\s*\\begin\{rSection\}\{([^}]*)\}', template_content)
+
+        # Create a prompt for Gemini to analyze template and generate LaTeX
+        prompt = f"""
+        You are an expert LaTeX document generator. I need you to create a well-formatted resume in LaTeX using a specific template structure.
+        
+        TEMPLATE SECTIONS:
+        {', '.join(sections)}
+        
+        COMMENTED SECTIONS (can be uncommented):
+        {', '.join(commented_sections)}
+        
+        JSON RESUME DATA:
+        {json.dumps(resume_json, indent=2)}
+        
+        CURRENT TEMPLATE STRUCTURE:
+        {template_content}
+        
+        I need you to generate a complete LaTeX document using the existing template structure. 
+        Please follow these requirements:
+        1. Keep the document class and package definitions exactly as they are
+        2. Use the \\name{{}} command to set the person's name from contact_info
+        3. Use the \\address{{}} commands for contact information like phone, email, location, etc.
+        4. For each section in the template (rSection), fill in appropriate content from the JSON data
+        5. Ensure proper LaTeX escaping for special characters (_, %, $, #, &, etc.)
+        6. Format each section according to the template's existing style and spacing
+        7. Maintain the overall document structure with \\begin{{document}} and \\end{{document}}
+       
+        8. IMPORTANT: For the ADDRESS section, modify the address command to use wrapping, either by:
+           - See if the address is too long, if it is then break the address into multiple address blocks
+           - Using shorter lines that don't exceed page width\
+           - Breaking long text with explicit line breaks (\\\\)
+           - For URLs, use shorter display text: \\href{{https://www.linkedin.com/in/username}}{{LinkedIn}}
+        
+        Return ONLY the complete LaTeX document with no additional text before or after.
+        """
+
+        # Generate content with Gemini
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.0,
+                top_p=0.5,
+                top_k=40,
+                max_output_tokens=8192,
+                response_mime_type="text/plain"
+            )
+        )
+
+        # Process the response as raw text
+        latex_content = response.text.strip()
+
+        # Remove any markdown code block markers more thoroughly
+        if "```" in latex_content:
+            # First try the standard code block extraction
+            match = re.search(
+                r'```(?:latex)?[\s\r\n]*([\s\S]+?)[\s\r\n]*```', latex_content)
+            if match:
+                latex_content = match.group(1).strip()
+                print("Successfully extracted LaTeX content from code block")
+            else:
+                # If regex match fails, try simple removal
+                latex_content = latex_content.replace(
+                    "```latex", "").replace("```", "").strip()
+                print("Removed code block markers from LaTeX content")
+
+        # Check if content starts with LaTeX document indicator
+        if "\\documentclass" in latex_content:
+            print("Successfully generated LaTeX content directly")
+            return latex_content
+        else:
+            print(
+                "Warning: Generated content may not be valid LaTeX. Attempting to use it anyway.")
+            return latex_content
+
+    except Exception as e:
+        print(f"Error generating LaTeX with Gemini API: {str(e)}")
+        return None
+
+
+def create_fallback_mapping(resume_json, sections):
+    """
+    Create a fallback mapping when Gemini API JSON parsing fails
+
+    Parameters:
+        resume_json (dict): Resume data in JSON format
+        sections (list): List of section names from template
+
+    Returns:
+        dict: Basic mapping of sections to LaTeX content
+    """
+    mapping = {}
+
+    # Add contact info
+    if "contact_info" in resume_json:
+        contact = resume_json["contact_info"]
+        name = escape_latex(str(contact.get("name", "")))
+        mapping["name"] = name
+
+        # Create address blocks with proper wrapping
+        phone = escape_latex(str(contact.get("phone", "")))
+        location = escape_latex(str(contact.get("location", "")))
+        # Simple line breaks for address
+        address1 = f"{phone} \\\\ {location}"
+        mapping["address1"] = address1
+
+        email = escape_latex(str(contact.get("email", "")))
+        linkedin = escape_latex(str(contact.get("linkedin", "")))
+        github = escape_latex(str(contact.get("github", "")))
+        website = escape_latex(str(contact.get("website", "")))
+
+        # Format links with shorter display text and explicit line breaks
+        address2_parts = []
         if email:
-            address_line2.append(f"\\href{{mailto:{email}}}{{{email}}}")
+            address2_parts.append(f"\\href{{mailto:{email}}}{{{email}}}")
         if linkedin:
-            address_line2.append(f"\\href{{{linkedin}}}{{LinkedIn}}")
+            # Use shorter display text for LinkedIn
+            if "linkedin.com" in linkedin:
+                address2_parts.append(f"\\href{{{linkedin}}}{{LinkedIn}}")
+            else:
+                address2_parts.append(linkedin)
         if github:
-            address_line2.append(f"\\href{{{github}}}{{Github}}")
+            # Use shorter display text for GitHub
+            if "github.com" in github:
+                address2_parts.append(f"\\href{{{github}}}{{GitHub}}")
+            else:
+                address2_parts.append(github)
         if website:
-            website_display = website.replace(
-                "https://", "").replace("http://", "")
-            address_line2.append(f"\\href{{{website}}}{{{website_display}}}")
+            # Use shorter display text for website
+            if len(website) > 30:
+                domain = website.replace(
+                    "https://", "").replace("http://", "").split("/")[0]
+                address2_parts.append(f"\\href{{{website}}}{{{domain}}}")
+            else:
+                address2_parts.append(f"\\href{{{website}}}{{{website}}}")
 
-        if address_line2:
-            address_block2 = " \\\\ ".join(address_line2)
-        else:
-            address_block2 = "example@email.com"
+        # Join with explicit line breaks
+        address2 = " \\\\ ".join(address2_parts)
+        mapping["address2"] = address2
 
-        # Find and replace address blocks
-        address_patterns = list(re.finditer(
-            r'\\address\{[^}]*\}', template_content))
+    # Map common sections
+    for section in sections:
+        section_lower = section.lower()
 
-        if len(address_patterns) >= 2:
-            # Replace first and second address blocks
-            template_content = re.sub(re.escape(address_patterns[0].group(
-                0)), f'\\address{{{address_block1}}}', template_content, count=1)
-            template_content = re.sub(re.escape(address_patterns[1].group(
-                0)), f'\\address{{{address_block2}}}', template_content, count=1)
-        elif len(address_patterns) == 1:
-            # Replace only first address block and add second
-            template_content = re.sub(re.escape(address_patterns[0].group(
-                0)), f'\\address{{{address_block1}}}\\address{{{address_block2}}}', template_content, count=1)
-
-        # Handle sections by finding each rSection and replacing its content
-
-        # Education Section
-        education_pattern = r'\\begin\{rSection\}\{Education\}(.*?)\\end\{rSection\}'
-        education_match = re.search(
-            education_pattern, template_content, re.DOTALL)
-
-        if education_match and "education" in resume_json and resume_json["education"]:
-            education_content = "\n\n"
+        # Education section
+        if section_lower == "education" and "education" in resume_json:
+            content = "\n\n"
             for edu in resume_json["education"]:
                 degree = escape_latex(str(edu.get("degree", "")))
                 institution = escape_latex(str(edu.get("institution", "")))
                 dates = escape_latex(str(edu.get("dates", "")))
                 details = escape_latex(str(edu.get("details", "")))
 
-                education_content += f"{{\\bf {degree}}}, {institution} \\hfill {{{dates}}}\\\\\n"
+                content += f"{{\\bf {degree}}}, {institution} \\hfill {{{dates}}}\\\\\n"
                 if details:
-                    education_content += f"\\textbf{{Relevant Coursework:}} {details}\n\n"
+                    content += f"\\textbf{{Relevant Coursework:}} {details}\n\n"
                 else:
-                    education_content += "\n"
+                    content += "\n"
 
-            education_section = f"\\begin{{rSection}}{{Education}}{education_content}\\end{{rSection}}"
-            template_content = template_content.replace(
-                education_match.group(0), education_section)
+            mapping[section] = content
 
-        # Skills Section
-        skills_pattern = r'\\begin\{rSection\}\{SKILLS\}(.*?)\\end\{rSection\}'
-        skills_match = re.search(skills_pattern, template_content, re.DOTALL)
-
-        if skills_match and "skills" in resume_json:
-            skills_content = "\n\n\\begin{tabular}{ @{} >{\\bfseries}l @{\\hspace{6ex}} l }\n"
+        # Skills section
+        elif section_lower == "skills" and "skills" in resume_json:
+            content = "\n\n\\begin{tabular}{ @{} >{\\bfseries}l @{\\hspace{4ex}} p{13cm} }"
 
             if isinstance(resume_json["skills"], list):
                 skills_list = [escape_latex(str(skill))
                                for skill in resume_json["skills"]]
                 skills_str = ", ".join(skills_list)
-                skills_content += f"Skills & {skills_str} \\\\\n"
+                content += f"Skills & {skills_str} \\\\"
             elif isinstance(resume_json["skills"], dict):
                 for skill_category, skills in resume_json["skills"].items():
                     if skills and isinstance(skills, list):
-                        # Format the category name for display
-                        category_display = escape_latex(skill_category.replace(
-                            "_", " ").title())
-                        skills_list = [escape_latex(str(skill))
-                                       for skill in skills]
-                        skills_str = ", ".join(skills_list)
-                        skills_content += f"{category_display} & {skills_str} \\\\\n"
+                        category_display = escape_latex(
+                            skill_category.replace("_", " ").title())
+                        skills_str = ", ".join(
+                            [escape_latex(str(skill)) for skill in skills])
+                        content += f"{category_display} & {skills_str} \\\\"
 
-            skills_content += "\\end{tabular}\\\\\n"
-            skills_section = f"\\begin{{rSection}}{{SKILLS}}{skills_content}\\end{{rSection}}"
-            template_content = template_content.replace(
-                skills_match.group(0), skills_section)
+            content += "\\end{tabular}\\\\\n"
+            mapping[section] = content
 
-        # Experience Section
-        experience_pattern = r'\\begin\{rSection\}\{EXPERIENCE\}(.*?)\\end\{rSection\}'
-        experience_match = re.search(
-            experience_pattern, template_content, re.DOTALL)
-
-        if experience_match and "experience" in resume_json and resume_json["experience"]:
-            experience_content = "\n\n"
+        # Experience section
+        elif (section_lower == "experience" or section_lower == "work experience") and "experience" in resume_json:
+            content = "\n\n"
 
             for job in resume_json["experience"]:
                 title = escape_latex(str(job.get("title", "")))
@@ -530,168 +704,101 @@ def create_resume_latex(resume_json, output_path="optimized_resume.tex"):
                 location = escape_latex(str(job.get("location", "")))
                 description = job.get("description", [])
 
-                # Ensure description is a list of strings
                 if not isinstance(description, list):
                     description = [str(description)]
 
-                experience_content += f"\\textbf{{{title}}} \\hfill {dates}\\\\\n"
-                experience_content += f"{company} \\hfill \\textit{{{location}}}\n"
-                experience_content += "\\begin{itemize}\n    \\itemsep -3pt {} \n"
+                content += f"\\textbf{{{title}}} \\hfill {dates}\\\\\n"
+                content += f"{company} \\hfill \\textit{{{location}}}\n"
+                content += "\\begin{itemize}\n    \\itemsep -3pt {} \n"
 
                 for bullet in description:
-                    # Ensure bullet is a string and escape LaTeX special characters
                     bullet_text = escape_latex(str(bullet))
-                    experience_content += f"     \\item {bullet_text}\n"
+                    content += f"     \\item {bullet_text}\n"
 
-                experience_content += "\\end{itemize}\n\n"
+                content += "\\end{itemize}\n\n"
 
-            experience_section = f"\\begin{{rSection}}{{EXPERIENCE}}{experience_content}\\end{{rSection}}"
-            template_content = template_content.replace(
-                experience_match.group(0), experience_section)
+            mapping[section] = content
 
-        # Projects Section
-        projects_pattern = r'\\begin\{rSection\}\{PROJECTS\}(.*?)\\end\{rSection\}'
-        projects_match = re.search(
-            projects_pattern, template_content, re.DOTALL)
+    # Add generic mapping for other sections if present in resume_json
+    if "summary" in resume_json or "objective" in resume_json:
+        summary = escape_latex(
+            str(resume_json.get("summary", resume_json.get("objective", ""))))
+        mapping["OBJECTIVE"] = f"\n\n{{{summary}}}\n\n"
 
-        if projects_match and "projects" in resume_json and resume_json["projects"]:
-            projects_content = "\n\\vspace{-1.25em}\n"
+    return mapping
 
-            for project in resume_json["projects"]:
-                if isinstance(project, dict):
-                    title = escape_latex(str(project.get("title", "")))
-                    description = project.get("description", "")
-                    technologies = escape_latex(
-                        str(project.get("technologies", "")))
-                    url = escape_latex(str(project.get("url", "")))
 
-                    # Add URL if available
-                    if url:
-                        title_with_url = f"{title} \\href{{{url}}}{{(Link)}}"
-                    else:
-                        title_with_url = title
+def apply_gemini_mapping(template_content, gemini_mapping):
+    """
+    Apply the Gemini-generated section mappings to the LaTeX template
 
-                    tech_text = f" \\textbf{{- {technologies}}}" if technologies else ""
-                    projects_content += f"\\item \\textbf{{{title_with_url}}}{tech_text} \n"
+    Parameters:
+        template_content (str): Original LaTeX template content
+        gemini_mapping (dict): Mapping of sections to LaTeX content
 
-                    if description:
-                        projects_content += "\\begin{itemize}\n    \\itemsep -6pt {} \n"
-                        # Process description based on its type
-                        if isinstance(description, list):
-                            for bullet in description:
-                                safe_bullet = escape_latex(str(bullet))
-                                projects_content += f"     \\item {safe_bullet}\n"
-                        else:
-                            safe_description = escape_latex(str(description))
-                            projects_content += f"     \\item {safe_description}\n"
-                        projects_content += " \\end{itemize}\n"
-                elif isinstance(project, str):
-                    # If project is just a string
-                    safe_project = escape_latex(project)
-                    projects_content += f"\\item {safe_project}\n"
+    Returns:
+        str: Modified template content with mapped sections
+    """
+    try:
+        # Process each section in the mapping
+        for section_name, section_content in gemini_mapping.items():
+            # Check if section exists in template
+            section_pattern = rf'\\begin{{rSection}}{{{section_name}}}(.*?)\\end{{rSection}}'
+            section_match = re.search(
+                section_pattern, template_content, re.DOTALL)
 
-            projects_section = f"\\begin{{rSection}}{{PROJECTS}}{projects_content}\\end{{rSection}}"
-            template_content = template_content.replace(
-                projects_match.group(0), projects_section)
-
-        # Activities Section
-        activities_pattern = r'\\begin\{rSection\}\{Extra-Curricular Activities\}(.*?)\\end\{rSection\}'
-        activities_match = re.search(
-            activities_pattern, template_content, re.DOTALL)
-
-        if activities_match and "activities" in resume_json and resume_json["activities"]:
-            activities_content = "\n\\vspace{0em}\n\\begin{itemize}\n    \\itemsep -6pt {} \n"
-
-            for activity in resume_json["activities"]:
-                # Ensure activity is a string and escape LaTeX special characters
-                safe_activity = escape_latex(str(activity))
-                activities_content += f"     \\item {safe_activity}\n"
-
-            activities_content += "\\end{itemize}\n"
-            activities_section = f"\\begin{{rSection}}{{Extra-Curricular Activities}}{activities_content}\\end{{rSection}}"
-            template_content = template_content.replace(
-                activities_match.group(0), activities_section)
-
-        # Leadership Section (optional)
-        leadership_pattern = r'\\begin\{rSection\}\{Leadership\}(.*?)\\end\{rSection\}'
-        leadership_match = re.search(
-            leadership_pattern, template_content, re.DOTALL)
-
-        if "leadership" in resume_json and resume_json["leadership"]:
-            leadership_content = "\n\\vspace{0em}\n\\begin{itemize}\n    \\itemsep -6pt {} \n"
-
-            for leadership in resume_json["leadership"]:
-                # Ensure leadership is a string and escape LaTeX special characters
-                safe_leadership = escape_latex(str(leadership))
-                leadership_content += f"     \\item {safe_leadership}\n"
-
-            leadership_content += "\\end{itemize}\n"
-            leadership_section = f"\\begin{{rSection}}{{Leadership}}{leadership_content}\\end{{rSection}}"
-
-            if leadership_match:
+            if section_match:
+                # Replace existing section
+                replacement = f"\\begin{{rSection}}{{{section_name}}}\n{section_content}\n\\end{{rSection}}"
                 template_content = template_content.replace(
-                    leadership_match.group(0), leadership_section)
+                    section_match.group(0), replacement)
             else:
-                # Add leadership section at the end of the document
-                end_document_pos = template_content.find("\\end{document}")
-                if end_document_pos > 0:
-                    template_content = template_content[:end_document_pos] + "\n\n" + \
-                        leadership_section + "\n\n" + \
-                        template_content[end_document_pos:]
+                # Check if it's a commented section that can be uncommented
+                commented_pattern = rf'%\s*\\begin{{rSection}}{{{section_name}}}(.*?)%\s*\\end{{rSection}}'
+                commented_match = re.search(
+                    commented_pattern, template_content, re.DOTALL)
 
-        # Handle Summary/Objective Section (uncomment if exists)
-        if "% \\begin{rSection}{OBJECTIVE}" in template_content and "summary" in resume_json:
-            summary_text = escape_latex(str(resume_json["summary"]))
-            template_content = template_content.replace(
-                "% \\begin{rSection}{OBJECTIVE}", "\\begin{rSection}{OBJECTIVE}")
-            template_content = template_content.replace(
-                "% \\end{rSection}", "\\end{rSection}")
+                if commented_match:
+                    # Uncomment and replace section
+                    commented_section = commented_match.group(0)
+                    uncommented_section = commented_section.replace('% ', '')
+                    replacement = f"\\begin{{rSection}}{{{section_name}}}\n{section_content}\n\\end{{rSection}}"
+                    template_content = template_content.replace(
+                        uncommented_section, replacement)
+                else:
+                    # Add new section at end of document
+                    end_document_pos = template_content.find("\\end{document}")
+                    if end_document_pos > 0 and section_content.strip():
+                        new_section = f"\\begin{{rSection}}{{{section_name}}}\n{section_content}\n\\end{{rSection}}\n\n"
+                        template_content = template_content[:end_document_pos] + \
+                            new_section + template_content[end_document_pos:]
 
-            # Now find and replace the content between these tags
-            objective_pattern = r'\\begin\{rSection\}\{OBJECTIVE\}(.*?)\\end\{rSection\}'
-            objective_match = re.search(
-                objective_pattern, template_content, re.DOTALL)
+        # Handle contact information and name separately since they're not in rSections
+        if "name" in gemini_mapping:
+            name_pattern = r'\\name\{[^}]*\}'
+            template_content = re.sub(
+                name_pattern, f'\\name{{{gemini_mapping["name"]}}}', template_content)
 
-            if objective_match:
-                objective_content = f"\n\n{{{summary_text}}}\n\n"
-                objective_section = f"\\begin{{rSection}}{{OBJECTIVE}}{objective_content}\\end{{rSection}}"
-                template_content = template_content.replace(
-                    objective_match.group(0), objective_section)
+        if "address1" in gemini_mapping and "address2" in gemini_mapping:
+            address_patterns = list(re.finditer(
+                r'\\address\{[^}]*\}', template_content))
+            if len(address_patterns) >= 2:
+                template_content = re.sub(re.escape(address_patterns[0].group(0)),
+                                          f'\\address{{{gemini_mapping["address1"]}}}',
+                                          template_content, count=1)
+                template_content = re.sub(re.escape(address_patterns[1].group(0)),
+                                          f'\\address{{{gemini_mapping["address2"]}}}',
+                                          template_content, count=1)
+            elif len(address_patterns) == 1:
+                template_content = re.sub(re.escape(address_patterns[0].group(0)),
+                                          f'\\address{{{gemini_mapping["address1"]}}}\\address{{{gemini_mapping["address2"]}}}',
+                                          template_content, count=1)
 
-        # Write the modified template to the output file
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(template_content)
-
-        # Copy resume.cls to the output directory if it doesn't exist
-        output_dir = os.path.dirname(output_path)
-        if output_dir == "":
-            output_dir = "."
-
-        cls_source = os.path.join(template_dir, "resume.cls")
-        cls_target = os.path.join(output_dir, "resume.cls")
-
-        try:
-            if os.path.exists(cls_source) and not os.path.exists(cls_target):
-                with open(cls_source, 'r', encoding='utf-8') as src:
-                    with open(cls_target, 'w', encoding='utf-8') as dst:
-                        dst.write(src.read())
-            else:
-                print(f"Note: resume.cls already exists at {cls_target}")
-        except Exception as e:
-            print(f"Warning: Could not copy resume.cls file: {str(e)}")
-            print(
-                f"You may need to manually copy resume.cls from {template_dir} to {output_dir}")
-
-        print(
-            f"✅ LaTeX resume file created at {output_path} using template format")
-        print("To generate PDF, run: pdflatex optimized_resume.tex")
-        return True
+        return template_content
 
     except Exception as e:
-        print(f"Error creating LaTeX resume from template: {str(e)}")
-        print(f"Debug info - JSON keys: {list(resume_json.keys())}")
-        print("Falling back to default LaTeX generation...")
-        return _create_default_latex_resume(resume_json, output_path)
+        print(f"Error applying AI-generated mappings to template: {str(e)}")
+        return template_content
 
 
 def escape_latex(text):
@@ -768,19 +875,44 @@ def _create_default_latex_resume(resume_json, output_path="optimized_resume.tex"
         contact_line1 = f"{phone} \\\\ {location}"
         latex_content.append(f"\\address{{{contact_line1}}}")
 
-        # Contact info - second address block (email, linkedin, website)
+        # Contact info - second address block (email, linkedin, website, github)
         email = escape_latex(str(resume_json["contact_info"].get("email", "")))
         linkedin = escape_latex(
             str(resume_json["contact_info"].get("linkedin", "")))
         website = escape_latex(
             str(resume_json["contact_info"].get("website", "")))
+        github = escape_latex(
+            str(resume_json["contact_info"].get("github", "")))
 
-        email_line = f"\\href{{mailto:{email}}}{{{email}}}" if email else ""
-        linkedin_line = f"\\href{{{linkedin}}}{{{linkedin.replace('https://', '')}}}" if linkedin else ""
-        website_line = f"\\href{{{website}}}{{{website.replace('https://', '')}}}" if website else ""
+        # Format each contact element with shorter display text
+        contact_parts = []
+        if email:
+            contact_parts.append(f"\\href{{mailto:{email}}}{{{email}}}")
 
-        contact_parts = [part for part in [
-            email_line, linkedin_line, website_line] if part]
+        if linkedin:
+            # Use shorter display text for LinkedIn
+            if "linkedin.com" in linkedin:
+                contact_parts.append(f"\\href{{{linkedin}}}{{LinkedIn}}")
+            else:
+                contact_parts.append(linkedin)
+
+        if github:
+            # Use shorter display text for GitHub
+            if "github.com" in github:
+                contact_parts.append(f"\\href{{{github}}}{{GitHub}}")
+            else:
+                contact_parts.append(github)
+
+        if website:
+            # Use shorter display text for website if URL is long
+            if len(website) > 30:
+                domain = website.replace(
+                    "https://", "").replace("http://", "").split("/")[0]
+                contact_parts.append(f"\\href{{{website}}}{{{domain}}}")
+            else:
+                contact_parts.append(f"\\href{{{website}}}{{{website}}}")
+
+        # Join with explicit line breaks for better spacing
         contact_line2 = " \\\\ ".join(
             contact_parts) if contact_parts else "example@email.com"
         latex_content.append(f"\\address{{{contact_line2}}}")
@@ -821,7 +953,7 @@ def _create_default_latex_resume(resume_json, output_path="optimized_resume.tex"
             latex_content.append("\\begin{rSection}{SKILLS}")
             latex_content.append("")
             latex_content.append(
-                "\\begin{tabular}{ @{} >{\\bfseries}l @{\\hspace{6ex}} l }")
+                "\\begin{tabular}{ @{} >{\\bfseries}l @{\\hspace{4ex}} p{13cm} }")
 
             if isinstance(resume_json["skills"], list):
                 skills_list = [escape_latex(str(skill))

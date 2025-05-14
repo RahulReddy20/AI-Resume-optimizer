@@ -1,67 +1,102 @@
- 
- 
- 
-EDUCATION  Muppidi Rahul Reddy  
-Sunnyvale, CA, 94085  | 940-745-9717  | rahulreddy 3620 @gmail.com  | linkedin.com/muppidi -
-rahul -reddy  | github.com/ RahulReddy20  | rahul -reddy.vercel.app  
- 
-University  of Texas  at Dallas  Aug ‘2022 – Dec ‘ 2023 
-Master  of Science  in Computer Science  GPA  3.61 
-Courses:  Statistical Methods for Data Science, Machine Learning, Computer Vision, Big Data  Analytics, Design and Analysis of 
-Algorithms, Web Programming Languages, Database Design.  
-Indian  Institute  of Information  Technology Allahabad  Jul ‘2018 - May ‘2022 
-Bachelor  of Technology  in Information  Technology   
-Courses: Data  Structures  and Algorithms,  Operating  Systems,  Automata  Theory,  Database  Management,  Machine Learning, Computer  
-Networks,  Data  Mining, Graph Theory, Object Oriented Programming, Wireless Network Security  
-TECHNICAL  KNOWLEDGE  
-Programming Languages  
-Databases  
-Systems Programming  
-Cloud & Big Data  
- 
-Web Development  
-Machine Learning  
-Genera tive AI  C/C++,  Python,  Java, JavaScript,  R, Shell  Scripting ,  
-MySQL,  PostgreSQL, MongoDB,  Oracle  DB 
-Inodes, File Handling, Page Tables, Process Scheduling, Virtual Memory, Interrupt Handling  
-AWS (S3, EC2, RDS , Lamda, Textract, OpenSearch Service, SageMaker, Bedrock ), Apache Spark, 
-Hadoop, Kafka  
-HTML,  CSS, React, NextJS, PHP, Typescript , Flask  
-Panda s, Numpy, Yolov5, Tensorflow, Keras , Pytorch, SciPy,  Scikit -learn  
-LangChain, LMStudio, Ollama, Prompt Engineering , RAG  
-Other  Tools & Technologies  Docker, Git, Power BI, MATLAB, Excel  
-PROFESSIONAL  EXPERIENCE  
- 
-Applab Systems,  Dallas,TX   Jan ‘2024 – Present  
-Software Development Engineer  – RAG , NLP , LangChain  
-• Improved information retrieval accuracy by 70% compared to keyword search by implementing semantic search capabilities using 
-Amazon OpenSearch Service  with the k -NN index.  
-• Built a highly accurate (95%+) document OCR pipeline utilizing Amazon Textract  for extracting text and structural data from 
-complex engineering diagrams and schematics stored in S3.  
-• Optimized retrieval precision by 40% through advanced text chunking algorithms executed in AWS Lambda  and generating vector 
-embeddings via OpenAI Embeddings API .  
-• Integrated  GPT -4 with Vision  via API calls from AWS compute  services to analyze and interpret engineering drawings, enhancing 
-multimodal RAG capabilities and boosting usability by 60%.  
-• Leveraged the GPT -4 API  from AWS services for generating accurate, context -aware answers based on technical document chunks 
-retrieved from Amazon OpenSearch Service.  
-Coral Innovations Pvt. Ltd , Hyderabad,India   Dec ‘2021 – Jul ‘2022 
-Machine Leaning Engineer  – Pytorch, YOLOv5 , Python  
-• Engineered a Meter Board Reader application  using YOLOv5, automating meter reading with 78% accuracy . 
-• Improved dataset preprocessing, enhancing pipeline efficiency by 30%  through optimized feature extraction.  
-• Implemented data augmentation techniques , increasing model robustness and generalization.  
-• Fine-tuned object detection models, achieving higher accuracy with optimized hyperparameters . 
-ACADEMIC  PROJECTS  
-Mini Unix Kernel Simulation – C, Inodes , File-handling, Page tables     
-• Built a simplified Unix -like kernel  supporting process creation, scheduling, and system calls (e.g., fork(), exec(), wait()).  
-• Implemented a basic file system  layer with support for block -level access, inodes, and file metadata management.  
-• Designed an interrupt handling mechanism and incorporated basic virtual memory management with page tables and swapping.  
-Scalable Search Engine Using Elasticsearch – Elasticsearch, Python, Kibana   
-• Indexed large datasets (e.g., Wikipedia dump) and exposed a REST API for fast, ranked queries.  
-• Tuned shard allocation, replication, and indexing strategies to improve query throughput and fault tolerance . 
-• Integrated Kibana dashboards to visualize usage stats and search heatmaps.  
-Predicting Safety Probabilities by Location and Day  in Dallas – Pandas, Streamlit, sklearn , Llama -2 
-• Created a Streamlit dashboard  to analyze crime severity using Random Forest classification . 
-• Integrated Llama -2 NLP model  for text -based severity analysis.  
-PERSONAL  ACCOMPLISHMENTS  
-• Demonstrated problem -solving and technical skills  through active participation in hackathons and data science competitions.  
-• Managed social media engagement and event coordination for a university dance crew, increasing audience interaction.  
++1 480-277-2655 | abhishekreddy.satya@gmail.com | Linkdin-Abhishek | 1735 Home Gate Drive, San Jose, CA 95148Satya Abhishek Reddy Nallamilli
+Arizona State University (Tempe,AZ)                                                                                                      Jan 2021 - May 2022
+Master's in Information Technology                                                                                                                           CGPA - 4/4EDUCATION
+PROFESSIONAL EXPERIENCE
+Designed and developed a responsive, accessible UI for the internal Employee Service Portal using React.js, significantly
+enhancing cross-device usability and user engagement.
+Managed complex application state across features using Redux and Context API, improving maintainability, reducing
+prop-drilling, and streamlining data flow across modules.
+Integrated React Query to handle server-state and asynchronous API interactions, enabling auto-refetching, caching, and
+seamless UI responsiveness.
+Developed secure RESTful integrations with backend services using Node.js, ensuring reliable and scalable data exchange
+across the portal.
+Enabled real-time data updates and efficient client-server communication using Axios with error handling and retry
+mechanisms.
+Configured Webpack and Babel to bundle assets and transpile ES6+/JSX code, ensuring cross-browser compatibility and
+optimized performance.
+Built dynamic, single-page navigation with React Router, improving user experience with smooth transitions and zero full-
+page reloads.
+Applied Material-UI with custom CSS3 styling to create a modern, cohesive, and accessible design system across the
+portal interface.Walmart, Sunnyvale, CA                            
+Senior Frontend Engineer                                                                                                                                         May 2024-Present
+Responsibilities:
+Driving UI development for the Seller Center Payments module, supporting over 100,000+ third-party sellers with
+performant and user-centric financial tools.
+Single-handedly owned and delivered the Commission Savings initiative, collaborating with backend to build a new API,
+managing state using React Query, and deploying with zero frontend defects — improving seller visibility and reducing
+support tickets by 20%.
+Rebuilt the entire Capital module’s legacy UI, introducing modular, reusable React components and improving load
+performance by 45% and usability by 30%.
+Developed secure Plaid integration for bank linking, decreasing seller onboarding time by 25%.
+Integrated onboarding dashboards for third-party providers (Dowsure, Parafin, Payoneer, PingPong), expanding global
+access to working capital for sellers.
+Designed and implemented a self-service internal tool for business teams to instantly create seller-specific capital offers
+without engineering involvement.
+Enabled business users to upload Excel files, auto-validate data with real-time error feedback, and publish offers through
+a one-click interface.
+Significantly reduced manual engineering cycles and accelerated the rollout of personalized seller loan programs.
+Initiated and scoped a new epic focused on commission transparency, collaborating with Product and UX to address seller
+pain points and align roadmap with feedback.
+Mentoring 5 newly onboarded frontend engineers, leading KT sessions, grooming stories, providing task guidance, and
+offering pair programming support.
+Refactored shared libraries and state management using Context API, reducing code redundancy and decreasing bundle
+size by 18%.
+Regularly review and test peer PRs to ensure consistent code quality, performance, and alignment with team standards.
+Intelligenie LLC, Alpharetta, GA
+Frontend Engineer                                                                                                                               Oct 2023 - May 2024
+Responsibilities:
+Began contributing to Chevron’s internal enterprise applications as a support and QA engineer, and progressively
+transitioned into a frontend development role through hands-on experience and mentorship.
+Learned and implemented core frontend technologies including JavaScript, HTML5, and CSS3, contributing to UI
+enhancements and bug fixes in Chevron’s internal web tools.
+Gained practical experience working with React, gradually taking ownership of components and participating in code
+reviews and pair programming sessions with senior engineers.
+Integrated frontend components with backend services via REST APIs, learning how to fetch, handle, and display data
+dynamically within enterprise-grade interfaces.
+Shadowed frontend leads and contributed to converting legacy UI elements into React-based components, building a
+strong foundation in reusable component architecture and state management.
+Practiced using tools like Postman to test API endpoints and understand data flow between frontend and backend
+systems.
+Participated in Agile ceremonies and collaborated with cross-functional teams, improving understanding of frontend
+development cycles, sprint planning, and delivery timelines.
+Gradually contributed to production deployments using Azure DevOps, learning how frontend code is tested,
+integrated, and delivered in real enterprise environments.
+Collaborated with senior frontend engineers to understand and apply component lifecycle methods and React hooks,
+gaining deeper insight into rendering behavior and optimizing component performance.
+Built internal UI prototypes to explore layout ideas, gaining confidence in structuring responsive designs using CSS
+Flexbox and Grid, and progressively contributing to production interfaces.
+Documented learnings, reusable code snippets, and frontend setup steps, which helped new team members ramp up
+faster and improved overall project onboarding for frontend-related tasks.Accenture, Hyderabad,India
+Associate Software Engineer                                                                                                                          Mar 2018 - May 2020
+Responsibilities:Led the development of visually rich, performant UIs for OpenSearch Dashboards, using React, TypeScript, Redux, and
+Tailwind CSS to deliver scalable, accessible analytics dashboards for enterprise-grade observability and security data.
+Built reusable component libraries and custom plugins, driving modularity and consistency across the platform, and
+accelerating development cycles by 30%.
+Implemented Redux middleware to streamline async data flow and improve application state predictability, reducing UI
+lag and improving overall stability across plugins.
+Advocated and enforced TypeScript adoption, reducing runtime bugs and improving code maintainability across large
+frontend codebases.
+Collaborated closely with UX, design, and backend teams to translate detailed product specs into intuitive workflows
+and highly responsive web components.
+Delivered performance optimizations like code splitting, bundling, and SSR where applicable, cutting dashboard load
+times and improving user retention on data-heavy pages.
+Provided critical UX feedback during design reviews, influencing accessibility and usability decisions across core
+dashboard features.
+Authored and maintained technical documentation for frontend architecture and shared libraries, ensuring knowledge
+continuity and faster onboarding for new contributors.
+Organized and led frontend workshops and code reviews, fostering a culture of clean code, shared ownership, and
+continuous learning within the open-source engineering team.Amazon Web Services, Bellevue, WA
+Front-End Engineer                                                                                                                                             Jun 2022-Jun 2023
+Responsibilities
+Programming Languages & Frameworks: Java, Spring Boot, React, Redux, TypeScript, Flask (Python)
+Web Technologies: JavaScript, HTML5, CSS3, Tailwind CSS
+Database Management: MongoDB, Oracle, MySQL, DynamoDB
+Cloud Platforms & Services: AWS (EC2, S3, RDS, API Gateway, Elastic Kubernetes Service (EKS), CodePipeline, Cognito,
+CloudFormation), Azure (Functions, API Management, App Service, Blob Storage, CDN, DevOps, Notification Hubs)
+DevOps & CI/CD: Docker, Kubernetes, Jenkins, Terraform
+Testing & Quality Assurance: JUnit, Mockito, Jest, React Testing Library
+Other Technologies & Practices: Apache Kafka, GraphQL, D3.js, Agile methodologies, Test-driven development (TDD),
+CI/CD pipelines, OAuth, JWT, Serverless backend development, RESTful API development, Progressive Web App (PWA)
+features, Performance optimization (Google Lighthouse), Code review, Pair programming, Modular CSS architecture, Code
+splitting, Lazy loading
+Version Control & Collaboration: GIT, GitHubTOOLS AND TECHNOLOGIES
